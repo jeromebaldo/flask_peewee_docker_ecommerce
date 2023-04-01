@@ -1,20 +1,33 @@
-from flask import Flask, jsonify, redirect, url_for, request
-from flask.cli import with_appcontext
-from api8inf349 import view
-from api8inf349.models import init_app
-from api8inf349.services import API_Inter_Product_Services
-
+from flask import Flask
+from peewee import *
+import os
 
 def create_app(initial_config=None):
-    
     app = Flask("api8inf349")
-    init_app(app)
+    
+    # récupération des informations de connexion à la base de données depuis les variables d'environnement
+    db = PostgresqlDatabase(
+    database=os.environ['DB_NAME'],
+    user=os.environ['DB_USER'],
+    password=os.environ['DB_PASSWORD'],
+    host=os.environ['DB_HOST'],
+    port=os.environ['DB_PORT']
+    )
 
-    @app.route('/', methods=['GET'])
-    def get_products():
-        #reprendre le chargement des produits
-        product_list = []
-        product_list = API_Inter_Product_Services.list_Total_Product() 
-        return view.get_listProduit()
+    # modèle de table
+    class User(Model):
+        username = CharField()
+        email = CharField()
 
+        class Meta:
+            database = db
+            table_name = 'users'
+
+    # route de test
+    @app.route('/')
+    def index():
+        with db.transaction():
+            User.create(username= 'jerome', email='example@gmail.com')
+        return 'Hello, World!'
+    
     return app

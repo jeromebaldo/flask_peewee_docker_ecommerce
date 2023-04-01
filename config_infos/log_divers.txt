@@ -1,0 +1,13 @@
+URL : http://localhost:5050/
+Email : admin@admin.com
+Mot de passe : pass
+
+Dans le panneau de gauche de pgAdmin, cliquez sur "Serveurs".
+Cliquez sur le bouton "Ajouter un nouveau serveur".
+Dans l'onglet "Général", donnez un nom à votre serveur (par exemple : "PostgreSQL").
+Dans l'onglet "Connexion", remplissez les informations de connexion suivantes :
+
+    Hôte : postgres
+    Port : 5432 (par défaut)
+    Nom d'utilisateur : user (comme défini dans votre docker-compose)
+    Mot de passe : pass (comme défini dans votre docker-compose)

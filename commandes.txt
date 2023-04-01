@@ -1,3 +1,0 @@
-docker build -t api8inf349 .
-docker run -e REDIS_URL=redis://localhost -e DB_HOST=localhost -e DB_USER=user -e DB_PASSWORD=pass -e DB_PORT=5432 -e DB_NAME=api8inf349
-docker run -e DB_HOST=localhost -e DB_USER=user -e DB_PASSWORD=pass -e DB_PORT=5432 -e DB_NAME=api8inf349
