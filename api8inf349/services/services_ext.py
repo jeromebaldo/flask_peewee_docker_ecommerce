@@ -22,8 +22,8 @@ class API_Ext_Services(object):
 
         # Ajout des nouveaux produits à la base de données
         for product_data in data['products']:
-            Product.create(
-                #id=product_data['id'],
+            product_data = Product.create(
+                id=product_data['id'],
                 name=product_data['name'],
                 description=product_data['description'],
                 image=product_data['image'],
