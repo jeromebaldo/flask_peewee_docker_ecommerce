@@ -1,8 +1,9 @@
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(255),
-    email VARCHAR(255)
+CREATE TABLE product (
+    id INTEGER PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    image VARCHAR(255) NOT NULL,
+    weight INTEGER NOT NULL,
+    price FLOAT NOT NULL,
+    in_stock BOOLEAN NOT NULL
 );
-
-INSERT INTO users (username, email) VALUES ('alice', 'alice@example.com');
-INSERT INTO users (username, email) VALUES ('bob', 'bob@example.com');

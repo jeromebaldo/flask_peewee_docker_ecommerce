@@ -15,6 +15,14 @@ services:
     ports:
       - "5432:5432"
   
+  #reddis version 5
+  #cache:
+    #image: reddis:5
+    #restart: always
+    #ports:
+      #- "6379:6379"
+
+
   #conteneur pgadmin pas précisé dans les consignes 
   #mais qui m'a permis de vérifier les données sur la BD
   pgadmin:

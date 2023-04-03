@@ -2,32 +2,22 @@ from flask import Flask
 from peewee import *
 import os
 
+from api8inf349.models.models import Product
+from api8inf349.services.services_ext import API_Ext_Services
+
 def create_app(initial_config=None):
+    
     app = Flask("api8inf349")
     
-    # récupération des informations de connexion à la base de données depuis les variables d'environnement
-    db = PostgresqlDatabase(
-    database=os.environ['DB_NAME'],
-    user=os.environ['DB_USER'],
-    password=os.environ['DB_PASSWORD'],
-    host=os.environ['DB_HOST'],
-    port=os.environ['DB_PORT']
-    )
+    #mise à jour au démarrage de la table product avec API distante 
+    def update_on_start():
+        API_Ext_Services.update_products()
+    update_on_start()
 
-    # modèle de table
-    class User(Model):
-        username = CharField()
-        email = CharField()
-
-        class Meta:
-            database = db
-            table_name = 'users'
-
-    # route de test
+    
     @app.route('/')
     def index():
-        with db.transaction():
-            User.create(username= 'jerome', email='example@gmail.com')
+        #Product.create(name='Pommes', description='Un sac de pommes', image='pommes.jpg', weight=1, price=2.5, in_stock=True)
         return 'Hello, World!'
     
     return app
