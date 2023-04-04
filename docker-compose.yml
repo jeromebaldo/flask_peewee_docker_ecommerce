@@ -2,7 +2,7 @@ version: '3'
 
 services:
   
-  #conteneur postgresql
+  # conteneur postgresql
   db:
     image: postgres:12
     restart: always
@@ -10,21 +10,13 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: pass
       POSTGRES_DB: api8inf349
-    volumes:
-      - ./config_infos/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
-  
-  #reddis version 5
-  #cache:
-    #image: reddis:5
-    #restart: always
-    #ports:
-      #- "6379:6379"
+    volumes:
+      - db_data:/var/lib/postgresql/data
 
-
-  #conteneur pgadmin pas précisé dans les consignes 
-  #mais qui m'a permis de vérifier les données sur la BD
+  # conteneur pgadmin pas précisé dans les consignes 
+  # mais qui m'a permis de vérifier les données sur la BD
   pgadmin:
     image: dpage/pgadmin4
     restart: always
@@ -37,11 +29,13 @@ services:
     links:
       - db:postgres
 
-  #application web 
+  # application web 
   api8inf349:
     build: .
-    restart: always
     ports:
       - "5000:5000"
     depends_on:
       - db
+
+volumes:
+  db_data:

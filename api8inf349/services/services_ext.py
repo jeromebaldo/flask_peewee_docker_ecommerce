@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, redirect, url_for
 from flask.cli import with_appcontext
 from peewee import PostgresqlDatabase
-#import click
 import requests
 import json
 
@@ -13,7 +12,8 @@ class API_Ext_Services(object):
     # suppression des éléments de la table Product et remplacement 
     @classmethod
     def update_products(cls):
-        # Récupération des produits depuis l'API externe
+
+        #récupération des données sur l'API externe
         response = requests.get('http://dimprojetu.uqac.ca/~jgnault/shops/products/')
         data = response.json()
 
@@ -22,14 +22,8 @@ class API_Ext_Services(object):
 
         # Ajout des nouveaux produits à la base de données
         for product_data in data['products']:
-            product_data = Product.create(
-                id=product_data['id'],
-                name=product_data['name'],
-                description=product_data['description'],
-                image=product_data['image'],
-                weight=product_data['weight'],
-                price=product_data['price'],
-                in_stock=product_data['in_stock']      
-            )
+            # supprimer les caractères nuls de la chaîne de caractères car blocage de mon client
+            product_data = {key: value.replace('\x00', '') if isinstance(value, str) else value for key, value in product_data.items()}
+            product = Product.create(**product_data)
 
         
