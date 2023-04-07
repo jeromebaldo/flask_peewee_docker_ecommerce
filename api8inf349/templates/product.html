@@ -1,0 +1,26 @@
+<table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Image</th>
+        <th>Weight</th>
+        <th>Price</th>
+        <th>In Stock</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for product in products %}
+        <tr>
+          <td>{{ product.id }}</td>
+          <td>{{ product.name }}</td>
+          <td>{{ product.description }}</td>
+          <td>{{ product.image }}</td>
+          <td>{{ product.weight }}</td>
+          <td>{{ product.price }}</td>
+          <td>{{ product.in_stock }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+</table>
