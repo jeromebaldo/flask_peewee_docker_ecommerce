@@ -24,4 +24,15 @@ def create_app(initial_config=None):
 
         return render_template('product.html', products=products), 200
     
+    @app.route('/order', methods=['POST'])
+    def create_order():#creation d'un order 
+        
+        #1er ETAPE verifier le produit existe 
+        response = API_Inter_Product_Services.exist_product(request)
+        if response['code'] != 200:
+            return jsonify(response['errors']), response['code']
+
+        #2e ETAPE verifier que le client a sélectionné au minimum 1 produit
+        response = API_Inter_Product_Services.solo_product(request)
+
     return app

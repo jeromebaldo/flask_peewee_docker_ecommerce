@@ -1,4 +1,6 @@
-<table>
+<form action="/order" method="post"></form>
+  <input type="submit" value="Valider vos produits">
+  <table>
     <thead>
       <tr>
         <th>ID</th>
@@ -20,7 +22,9 @@
           <td>{{ product.weight }}</td>
           <td>{{ product.price }}</td>
           <td>{{ product.in_stock }}</td>
+          <td><input type="checkbox" name="selected_product" value="{{ product.id }}"></td>
         </tr>
       {% endfor %}
     </tbody>
-</table>
+  </table>
+</form>
