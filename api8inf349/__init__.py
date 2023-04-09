@@ -32,7 +32,5 @@ def create_app(initial_config=None):
         if response['code'] != 200:
             return jsonify(response['errors']), response['code']
 
-        #2e ETAPE verifier que le client a sélectionné au minimum 1 produit
-        response = API_Inter_Product_Services.solo_product(request)
 
     return app

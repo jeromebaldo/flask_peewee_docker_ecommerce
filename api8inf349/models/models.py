@@ -24,22 +24,37 @@ class Product(BaseModel):
     price = FloatField()
     in_stock = BooleanField()
 
-class Poll(BaseModel):
+class Shipping_Information(BaseModel):
     id = AutoField(primary_key=True)
-    name = CharField(null=False)
-    date = DateTimeField()
+    country = CharField()
+    address = CharField()
+    city = CharField()
+    province = CharField()
 
-class Choice(BaseModel):
+class Transaction(BaseModel):
+    id = CharField(primary_key=True)
+    success = BooleanField()
+    amount_charged = IntegerField()
+
+class CreditCard(BaseModel):
     id = AutoField(primary_key=True)
-    choice = CharField(null=False)
-    poll = ForeignKeyField(Poll, backref="choices")
+    name = CharField()
+    first_digits = CharField()
+    last_digits = CharField()
+    expiration_year = IntegerField()
+    expiration_month = IntegerField()
 
-class VoteCast(BaseModel):
+class Order(BaseModel):
     id = AutoField(primary_key=True)
-    poll = ForeignKeyField(Poll, backref="vote_casts")
-    choice = ForeignKeyField(Choice, backref="vote_casts")
+    total_price = IntegerField(default=0.0)
+    email = CharField(null=True)
+    paid = BooleanField(default=False)
+    shipping_price = FloatField(default=0)
+    product = JSONField(default={})
+    shipping_information = ForeignKeyField(Shipping_Information, backref="orders")
+    transaction = ForeignKeyField(Transaction, backref="orders")
+    credit_card = ForeignKeyField(CreditCard, backref="orders")
 
-   
 # Fonction pour initialiser la base de données avec les données initiales
 @click.command("init-db")
 @with_appcontext  
@@ -51,7 +66,7 @@ def init_db_command():
     host=os.environ['DB_HOST'],
     port=os.environ['DB_PORT']
     )
-    database.create_tables([Product, Poll, Choice, VoteCast])
+    database.create_tables([Product, Shipping_Information, Transaction, CreditCard , Order])
     click.echo("Initialized the database.")
         
 def init_app(app):

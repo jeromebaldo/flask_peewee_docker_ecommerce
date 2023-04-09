@@ -12,8 +12,8 @@ services:
       POSTGRES_DB: api8inf349
     ports:
       - "5432:5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
+    #volumes:
+      #- db_data:/var/lib/postgresql/data
 
   # conteneur pgadmin pas précisé dans les consignes 
   # mais qui m'a permis de vérifier les données sur la BD
@@ -37,5 +37,5 @@ services:
     depends_on:
       - db
 
-volumes:
-  db_data:
+#volumes:
+  #db_data:
