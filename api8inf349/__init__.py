@@ -4,6 +4,7 @@ from api8inf349.models.models import Product, init_app
 from api8inf349.services.services_ext import API_Ext_Services
 from api8inf349.services.services_int import API_Inter_Product_Services
 
+from api8inf349.models.models import Product
 
 def create_app(initial_config=None):
     app = Flask("api8inf349")
@@ -27,10 +28,20 @@ def create_app(initial_config=None):
     @app.route('/order', methods=['POST'])
     def create_order():#creation d'un order 
         
-        #1er ETAPE verifier le produit existe 
-        response = API_Inter_Product_Services.exist_product(request)
-        if response['code'] != 200:
-            return jsonify(response['errors']), response['code']
+        #1er ETAPE : verifier qu'il  y est au moins une commande 
+        selected_products = []
+        for key in request.form:
+            if key.startswith('selected_product_'):
+                product_id = request.form.get(key)
+                quantity_key = f"product_quantity_{product_id}"
+                quantity = request.form.get(quantity_key)
+                selected_products.append({"id" : product_id, "quantity" : quantity})
+        #return jsonify(products=selected_products), 200
+        #2e ETAPE : verifier que les produits existent 
+        for product in selected_products:
+            if Product.get(Product.id == )
+        #3e ETAPE : verifier que les produits soient en stocks 
 
+        #4e ETAPE : verifier que les quantites pour chaque produit soit égal ou supérieur à 1 
 
     return app
