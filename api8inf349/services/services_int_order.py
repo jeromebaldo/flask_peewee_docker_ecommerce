@@ -230,9 +230,10 @@ class API_Inter_Order_Services(object):
         
         #c'est la que je remplit le credit_card et transaction 
         # paid = true 
-        CreditCard.create(name = response, first_digits = , last_digits = , expiration_year = , expiration_month = ,)
-
-
+        #CreditCard.create(name = response['transaction'][], first_digits = , last_digits = , expiration_year = , expiration_month = ,)
+        #reste à faire l'erreur et à implémenter credit_card et transaction 
+        #implémentation de reddis et faire 2 focntions une au départ pour récupérer les infos si il ya et une autre pour implémenter et refaire la consultation de l'order (paid =true)
+        return {'order' : "credit_card OK" ,'code': 200}
         """ "name" : John Doe
         "number" : 4242 4242 4242 4242 
         "expiration_year" : 2024 
