@@ -121,17 +121,6 @@ def create_app(initial_config=None):
                 return jsonify(response['order']), response['code']
             else:
                return jsonify(response['error']), response['code']
-            
-            """ #methode credit_card
-            creditCard = { "credit_card" : {
-                'name': request.form['name'],
-                'number': request.form['number'],
-                'expiration_month': request.form['expiration_month'],
-                'expiration_year': request.form['expiration_year'],
-                'cvv': request.form['cvv']
-            }}
-            
-            return jsonify(creditCard), 200 """
         
         else:
             

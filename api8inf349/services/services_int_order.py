@@ -5,8 +5,8 @@ import click
 import requests
 import json
 
-from api8inf349.models.models import Product, Order, CommandOrder, Shipping_Information
-
+from api8inf349.models.models import Product, Order, CommandOrder, Shipping_Information, CreditCard
+from api8inf349.services.services_ext import API_Ext_Services
 class API_Inter_Order_Services(object):
     
     #METHODE pour créer un ordre et l'ajouter dans la bd
@@ -212,11 +212,32 @@ class API_Inter_Order_Services(object):
         if int(response['code']) != 200:
             return {'error': response['error'], 'code' : response['code']}
         
-        #recuperer le total price et le shipping price pour le total amount
-
+        #recuperer le total price et le shipping price pour le total amount et creer le json pour paiement
+        total_amount = order_paiement.total_price + order_paiement.shipping_price
+        info_credit = { "credit_card" : {
+                            "name" : request.form['name'], 
+                            "number" : request.form['number'], 
+                            "expiration_year" : request.form['expiration_year'], 
+                            "cvv" : request.form['cvv'], 
+                            "expiration_month" : request.form['expiration_month'] },
+                        "amount_charged": total_amount
+                    }
+                
         # envoyer la demande de paiement 
+        response = API_Ext_Services.to_verifCard(info_credit)
+        if response['code'] != 200:
+            return {'error': response['error'], 'code' : response['code']}
+        
+        #c'est la que je remplit le credit_card et transaction 
+        # paid = true 
+        CreditCard.create(name = response, first_digits = , last_digits = , expiration_year = , expiration_month = ,)
 
-        return {'order' : "credit_card OK" ,'code': 200}
+
+        """ "name" : John Doe
+        "number" : 4242 4242 4242 4242 
+        "expiration_year" : 2024 
+        "cvv" : 123 
+        "expiration_month" : 9 """
     
     @classmethod
     def verif_creditCard(cls,request):

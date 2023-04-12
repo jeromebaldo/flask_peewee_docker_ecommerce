@@ -25,5 +25,16 @@ class API_Ext_Services(object):
             # supprimer les caractères nuls de la chaîne de caractères car blocage de mon client
             product_data = {key: value.replace('\x00', '') if isinstance(value, str) else value for key, value in product_data.items()}
             product = Product.create(**product_data)
-
+    
+    @classmethod
+    def to_verifCard(cls,data):
+        url = 'http://dimprojetu.uqac.ca/~jgnault/shops/pay/'
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(url, json=data, headers=headers)
+        if response.status_code == 200:
+            transaction_data = response.json()
+            return {'transaction' : transaction_data, 'code' : 200}
+        else:
+            error_data = response.json().get('errors')
+            return {'error': error_data, 'code' : response.status_code}
         
