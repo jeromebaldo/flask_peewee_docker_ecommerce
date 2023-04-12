@@ -99,29 +99,29 @@ def create_app(initial_config=None):
 
     ############################################
     @app.route('/order/<int:order_id>', methods=['POST'])
-    def test_put(order_id):
-        email = request.form['email']
-        country = request.form['country']
-        address = request.form['address']
-        postal_code = request.form['postal_code']
-        city = request.form['city']
-        province = request.form['province']
+    def verif_put(order_id):
+        
+        if 'email' in request.form:
+             
+            API_Inter_Order_Services.put_order_infoClient(order_id, request)
 
-        order = {
-            "order": {
-                "email": email,
-                "shipping_information": {
-                    "country": country,
-                    "address": address,
-                    "postal_code": postal_code,
-                    "city": city,
-                    "province": province
-                }
-            }
-        }
-
-        return jsonify(order), 200
-
-
-
+            return jsonify("ok"), 200
+        
+        elif 'name' in request.form:
+            #methode credit_card
+            creditCard = { "credit_card" : {
+                'name': request.form['name'],
+                'number': request.form['number'],
+                'expiration_month': request.form['expiration_month'],
+                'expiration_year': request.form['expiration_year'],
+                'cvv': request.form['cvv']
+            }}
+            
+            return jsonify(creditCard), 200
+        else:
+            error = { "error" : {
+            'message': 'No email or name in form data'
+            }}
+            return jsonify(error), 400
+        
     return app

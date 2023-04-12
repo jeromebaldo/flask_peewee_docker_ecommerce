@@ -5,7 +5,7 @@ import click
 import requests
 import json
 
-from api8inf349.models.models import Product, Order, CommandOrder
+from api8inf349.models.models import Product, Order, CommandOrder, Shipping_Information
 
 class API_Inter_Order_Services(object):
     
@@ -112,3 +112,70 @@ class API_Inter_Order_Services(object):
                 'expiration_month': credit_card.expiration_month
             }
         return order_json
+    
+    @classmethod
+    def put_order_infoClient(cls,order_id, request):
+        orderModif = None
+        #verifier l'order existe
+        response = API_Inter_Order_Services.exist_order(order_id)
+        if response['code'] == 404:
+            return {'error' : response['error'], 'code' : 404}
+        else:
+            orderModif = Order.get(Order.id == order_id) #recuperation de l'order
+        
+        
+        
+        
+        
+        shipInfo = Shipping_Information.create(country=request.form['country'],address=request.form['address'],
+                        city=request.form['city'],postal_code=request.form['postal_code"'],province=request.form['province'])
+        orderModif.email = request.form['email']
+        orderModif.shipping_information = shipInfo
+        orderModif.save()
+        
+
+        #verifier que tous les champs soient remplis 
+        return jsonify("methode put_order_client"), 200
+    
+    @classmethod
+    def verif_infoClient(cls,request):
+        
+        #verifier que tous les champs soient compris dedans 
+        required_fields = {'email', 'country', 'address', 'postal_code', 'city', 'province'}
+        
+        # Vérifie si tous les champs requis sont présents dans la requête
+        if not required_fields.issubset(request.form.keys()):
+            
+            error = {
+                    'order': {
+                        'code': 'missing-fields',
+                        'name': "Il manque un ou plusieurs champs qui sont obligatoires"
+                    }
+                }
+            return {  'error' : error ,'code': 422}
+        
+        # Vérifier qu'il n'y a pas de champ supplémentaire dans la requête
+        if not required_fields.union({'name'}).issuperset(request.form.keys()):
+            
+            error = {
+                    'order': {
+                        'code': 'invalid-fields',
+                        'name': "Certains champs ne peuvent pas être modifiés par cette requête"
+                    }
+                }
+            
+            return {'error' : error ,'code': 422}
+
+        # Vérifier que tous les champs sont remplis
+        if not all(request.form.get(field) for field in required_fields):
+            
+            error = {
+                    'order': {
+                        'code': 'missing-fields',
+                        'name': "Il faut les informations clients pour compléter la commande"
+                    }
+                } 
+            
+            return {'error': error, 'code': 422}
+        
+        return {'code': 200}

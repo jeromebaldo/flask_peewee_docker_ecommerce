@@ -29,5 +29,25 @@
 
 		<button type="submit">valider info client</button>
 	</form>
+
+	<form id="myForm2" action="/order/{{order_id}}" method="POST" >
+		
+		<label for="name">Name:</label><br>
+		<input type="text" id="name" name="name" required><br>
+
+		 <label for="number">Number:</label><br>
+		<input type="text" id="number" name="number" required><br>
+
+		<label for="expiration_month">Expiration Month:</label><br>
+		<input type="text" id="expiration_month" name="expiration_month" required><br>
+
+		<label for="expiration_year">Expiration Year:</label><br>
+		<input type="text" id="expiration_year" name="expiration_year" required><br>
+
+		<label for="cvv">CVV:</label><br>
+		<input type="text" id="cvv" name="cvv" required><br>
+
+		<button type="submit">valider info carte de crédit</button>
+	</form>
   </body>
 </html>

@@ -33,6 +33,7 @@ class Shipping_Information(BaseModel):
     country = CharField()
     address = CharField()
     city = CharField()
+    postal_code = CharField()
     province = CharField()
 
 ######################################
