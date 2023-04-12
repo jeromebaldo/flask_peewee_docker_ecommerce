@@ -113,30 +113,34 @@ class API_Inter_Order_Services(object):
             }
         return order_json
     
+    #METHODE pour  la mise à jour du shipping information 
     @classmethod
     def put_order_infoClient(cls,order_id, request):
+        
         orderModif = None
+        
         #verifier l'order existe
         response = API_Inter_Order_Services.exist_order(order_id)
-        if response['code'] == 404:
+        if int(response['code']) == 404:
             return {'error' : response['error'], 'code' : 404}
         else:
             orderModif = Order.get(Order.id == order_id) #recuperation de l'order
         
-        
-        
-        
-        
+        #methode pour remplissage des champs ainsi que la conformité des champs
+        response = API_Inter_Order_Services.verif_infoClient(request)
+        if int(response['code']) != 200:
+            return {'error': response['error'], 'code' : response['code']}
+
+        #creation du shipping information et de la mise à jour de l'order    
         shipInfo = Shipping_Information.create(country=request.form['country'],address=request.form['address'],
-                        city=request.form['city'],postal_code=request.form['postal_code"'],province=request.form['province'])
+                        city=request.form['city'],postal_code=request.form['postal_code'],province=request.form['province'])
         orderModif.email = request.form['email']
         orderModif.shipping_information = shipInfo
         orderModif.save()
         
-
-        #verifier que tous les champs soient remplis 
-        return jsonify("methode put_order_client"), 200
+        return {'order' : "shipping_information OK" ,'code': 200}
     
+    #METHODE pour verifier tous les champs ainsi que leur remplissage
     @classmethod
     def verif_infoClient(cls,request):
         
@@ -152,7 +156,7 @@ class API_Inter_Order_Services(object):
                         'name': "Il manque un ou plusieurs champs qui sont obligatoires"
                     }
                 }
-            return {  'error' : error ,'code': 422}
+            return {'error' : error ,'code': 422}
         
         # Vérifier qu'il n'y a pas de champ supplémentaire dans la requête
         if not required_fields.union({'name'}).issuperset(request.form.keys()):
@@ -179,3 +183,83 @@ class API_Inter_Order_Services(object):
             return {'error': error, 'code': 422}
         
         return {'code': 200}
+    
+    #METHODE pour mettre à jour l'order et réaliser le paiement 
+    @classmethod
+    def put_order_paiement(cls,order_id, request):
+        
+        order_paiement = None
+
+        #verifier l'order existe
+        response = API_Inter_Order_Services.exist_order(order_id)
+
+        if int(response['code']) == 404:
+            return {'error' : response['error'], 'code' : 404}
+        else:
+            order_paiement = Order.get(Order.id == order_id) #recuperation de l'order
+        
+        #verifier et obliger le client à remplir l'email et le shippinginformation avant de payer 
+        if order_paiement.email is None or order_paiement.shipping_information is None:
+            return { 'error' : {'errors' : { "order": { "code": "missing-field", "name": "l'email et/ou les informations d'expéditions n'ont été rentrées " } } }, 'code': 422}
+        
+        # si paid  == true alors la commande est déjà payé et retourne 422 avec json d'informations 
+        if order_paiement.paid == True:
+            return { 'error' : {'errors' : { "order": { "code": "already-paid", "name": "La commande a déjà été payée." } } }, 'code': 422}
+        
+        #verif des champs donnés par la credit_card
+        #recuperer le total price et le shipping price pour le total amount 
+        # envoyer la demande de paiement 
+
+        return {'order' : "credit_card OK" ,'code': 200}
+    
+    @classmethod
+    def verif_infoClient(cls,request):
+        
+        required_fields = {'name', 'number', 'expiration_month', 'expiration_year', 'cvv'}
+        
+        # Vérifie si tous les champs requis sont présents dans la requête
+        if not required_fields.issubset(request.form.keys()):
+            
+            error = {
+                    'order': {
+                        'code': 'missing-fields',
+                        'name': "Il manque un ou plusieurs champs qui sont obligatoires"
+                    }
+                }
+            return {'error' : error ,'code': 422}
+        
+        # Vérifier qu'il n'y a pas de champ supplémentaire dans la requête
+        if not required_fields.union({'name'}).issuperset(request.form.keys()):
+            
+            error = {
+                    'order': {
+                        'code': 'invalid-fields',
+                        'name': "Certains champs ne peuvent pas être modifiés par cette requête"
+                    }
+                }
+            
+            return {'error' : error ,'code': 422}
+
+        # Vérifier que tous les champs sont remplis
+        if not all(request.form.get(field) for field in required_fields):
+            
+            error = {
+                    'order': {
+                        'code': 'missing-fields',
+                        'name': "Il faut que les informations de la credit_card soient tous remplis"
+                    }
+                } 
+            
+            return {'error': error, 'code': 422}
+
+        #verifier que les expiration year et month sont des integer car l'APi externe ne verifie pas ces champs
+         #verifier que les expiration year et month sont des integer car l'APi externe ne verifie pas ces champs  
+        if not isinstance(request['expiration_year'], int) or not isinstance(request['expiration_month'], int) :
+            return {'error':  { 
+                "order": { 
+                    "code": "error-field", 
+                    "name": "année d'expiration ou/et mois expiration invalide " 
+                } }, 'code' : 422}
+        
+        return {'code': 200}
+        

@@ -9,6 +9,7 @@ from api8inf349.services.services_int_order import API_Inter_Order_Services
 from api8inf349.models.models import Product, Order, CommandOrder
 
 def create_app(initial_config=None):
+    
     app = Flask("api8inf349")
     init_app(app)
 
@@ -98,17 +99,30 @@ def create_app(initial_config=None):
         return render_template('info_commande.html', order=response, order_id=response['id']), 200
 
     ############################################
+    #ROUTE qui met à jour le shipping information ou réalise le paiement de l'order 
     @app.route('/order/<int:order_id>', methods=['POST'])
     def verif_put(order_id):
         
+        #si le champ envoyé par le formulaire comprend email alors shipping information 
         if 'email' in request.form:
              
-            API_Inter_Order_Services.put_order_infoClient(order_id, request)
+            response = API_Inter_Order_Services.put_order_infoClient(order_id, request)
 
-            return jsonify("ok"), 200
-        
+            if response['code'] == 200:
+                return jsonify(response['order']), response['code']
+            else:
+               return jsonify(response['error']), response['code'] 
+            
+        #si le champ envoyé par le formulaire comprend name alors credit-card 
         elif 'name' in request.form:
-            #methode credit_card
+            
+            response = API_Inter_Order_Services.put_order_paiement(order_id, request)
+            if response['code'] == 200:
+                return jsonify(response['order']), response['code']
+            else:
+               return jsonify(response['error']), response['code']
+            
+            """ #methode credit_card
             creditCard = { "credit_card" : {
                 'name': request.form['name'],
                 'number': request.form['number'],
@@ -117,8 +131,10 @@ def create_app(initial_config=None):
                 'cvv': request.form['cvv']
             }}
             
-            return jsonify(creditCard), 200
+            return jsonify(creditCard), 200 """
+        
         else:
+            
             error = { "error" : {
             'message': 'No email or name in form data'
             }}
