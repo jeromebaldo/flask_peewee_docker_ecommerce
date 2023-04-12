@@ -206,14 +206,20 @@ class API_Inter_Order_Services(object):
         if order_paiement.paid == True:
             return { 'error' : {'errors' : { "order": { "code": "already-paid", "name": "La commande a déjà été payée." } } }, 'code': 422}
         
-        #verif des champs donnés par la credit_card
-        #recuperer le total price et le shipping price pour le total amount 
+        #Vérification des champs donnés par la credit_card
+        response = API_Inter_Order_Services.verif_creditCard(request)
+
+        if int(response['code']) != 200:
+            return {'error': response['error'], 'code' : response['code']}
+        
+        #recuperer le total price et le shipping price pour le total amount
+
         # envoyer la demande de paiement 
 
         return {'order' : "credit_card OK" ,'code': 200}
     
     @classmethod
-    def verif_infoClient(cls,request):
+    def verif_creditCard(cls,request):
         
         required_fields = {'name', 'number', 'expiration_month', 'expiration_year', 'cvv'}
         
@@ -254,12 +260,12 @@ class API_Inter_Order_Services(object):
 
         #verifier que les expiration year et month sont des integer car l'APi externe ne verifie pas ces champs
          #verifier que les expiration year et month sont des integer car l'APi externe ne verifie pas ces champs  
-        if not isinstance(request['expiration_year'], int) or not isinstance(request['expiration_month'], int) :
+        """ if not isinstance(int(request.form['expiration_year']), int) or not isinstance(int(request.form['expiration_month']), int) :
             return {'error':  { 
                 "order": { 
                     "code": "error-field", 
                     "name": "année d'expiration ou/et mois expiration invalide " 
-                } }, 'code' : 422}
+                } }, 'code' : 422} """
         
         return {'code': 200}
         
