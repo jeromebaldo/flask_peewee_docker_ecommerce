@@ -11,10 +11,8 @@ from api8inf349.services.services_ext import API_Ext_Services
 from api8inf349.services.services_int_product import API_Inter_Product_Services
 from api8inf349.services.services_int_order import API_Inter_Order_Services
 
-
-
 redis = Redis(host=os.environ['REDIS_HOST'], port=6379, db=0)
-
+queue = Queue(connection=redis)
 
 #os.environ['DB_NAME']
 def create_app(initial_config=None):
