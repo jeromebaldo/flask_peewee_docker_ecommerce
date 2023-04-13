@@ -3,7 +3,7 @@ from peewee import *
 from redis import Redis
 import os
 import json
-from api8inf349.models.models import Product, Order, init_app
+from api8inf349.models.models import Product, Order, CommandOrder, init_app
 
 from api8inf349.services.services_ext import API_Ext_Services
 from api8inf349.services.services_int_product import API_Inter_Product_Services
@@ -11,7 +11,8 @@ from api8inf349.services.services_int_order import API_Inter_Order_Services
 
 
 
-redis = Redis(host="cache", port=6379, db=0)
+redis = Redis(host=os.environ['REDIS_HOST'], port=6379, db=0)
+
 
 #os.environ['DB_NAME']
 def create_app(initial_config=None):
@@ -137,7 +138,42 @@ def create_app(initial_config=None):
             if response['code'] == 200:
                 
                 #l'order a été payé ainsi je l'inclue dans le redis avec l'id de l'order comme clé 
-                order_redis = json.dumps(response['order'])
+                order = Order.get(id= order_id)
+                shipping_info = order.shipping_information
+                transac_info = order.transaction
+                credit_info = order.credit_card
+                order_final = { "order" : 
+                                { 
+                                    'id' : order_id,
+                                    'email' : order.email,
+                                    'total_price' : order.total_price,
+                                    'shipping_price': order.shipping_price,
+                                    'paid': order.paid,
+                                    'products' : [],
+                                    'shipping_information' : {
+                                        'country': shipping_info.country,
+                                        'address': shipping_info.address,
+                                        'city': shipping_info.city,
+                                        'province': shipping_info.province},
+                                    'credit_card' : { 
+                                        'name': credit_info.name,
+                                        'first_digits': credit_info.first_digits,
+                                        'last_digits': credit_info.last_digits,
+                                        'expiration_year': credit_info.expiration_year,
+                                        'expiration_month': credit_info.expiration_month},
+                                    'transaction': { 
+                                        'id': transac_info.id_transac,
+                                        'success': transac_info.success,
+                                        'amount_charged': transac_info.amount_charged,
+                                        'error' : {} }
+                                }}
+
+                
+                command_info = CommandOrder.select().where(CommandOrder.id_order == order.id)
+                for command in command_info:
+                    order_final['order']['products'].append({"id" : command.id_product.id, "quantity" : command.quantity})
+                
+                order_redis = json.dumps(order_final)
                 redis.set(order_id, order_redis)
                 
                 #succes du paiement alors on revient sur get order pour voir l'état de la commande

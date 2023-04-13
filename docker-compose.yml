@@ -1,7 +1,6 @@
 version: '3'
 
 services:
-  
   cache:
     image: redis:latest
     restart: always
@@ -10,7 +9,6 @@ services:
     expose:
       - '6379'
 
-  # conteneur postgresql
   db:
     image: postgres:12
     restart: always
@@ -23,8 +21,6 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
 
-  # conteneur pgadmin pas précisé dans les consignes 
-  # mais qui m'a permis de vérifier les données sur la BD
   pgadmin:
     image: dpage/pgadmin4
     restart: always
@@ -37,13 +33,24 @@ services:
     links:
       - db:postgres
 
-  # application web 
   api8inf349:
     build: .
     ports:
       - "5000:5000"
     depends_on:
       - db
+    environment:
+      FLASK_DEBUG: "True"
+      FLASK_APP: "api8inf349"
+      DB_HOST: "db"
+      DB_USER: "user"
+      DB_PASSWORD: "pass"
+      DB_PORT: "5432"
+      DB_NAME: "api8inf349"
+      REDIS_HOST: cache
+
+    command: >
+      bash -c "flask init-db && flask run --host=0.0.0.0"
 
 volumes:
   db_data:

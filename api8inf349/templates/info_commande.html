@@ -5,8 +5,10 @@
 	<meta charset="UTF-8">
   </head>
   <body>
+	<hr>
 	<p>ID ORDER ({{order_id}}) avec {{base}}</p>
     <pre>{{ order | tojson }}</pre>
+	<hr>
 	<form id="myForm" action="/order/{{order_id}}" method="POST" >
 		
 		<label for="email">Email:</label><br>
@@ -29,7 +31,7 @@
 
 		<button type="submit">valider info client</button>
 	</form>
-
+	<hr>
 	<form id="myForm2" action="/order/{{order_id}}" method="POST" >
 		
 		<label for="name">Name:</label><br>
