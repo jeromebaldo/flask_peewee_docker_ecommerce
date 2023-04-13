@@ -5,7 +5,7 @@ import click
 import requests
 import json
 
-from api8inf349.models.models import Product, Order, CommandOrder, Shipping_Information, CreditCard
+from api8inf349.models.models import Product, Order, CommandOrder, Shipping_Information, CreditCard, Transaction, Error
 from api8inf349.services.services_ext import API_Ext_Services
 class API_Inter_Order_Services(object):
     
@@ -57,9 +57,11 @@ class API_Inter_Order_Services(object):
     #METHODE pour retourner l'order demandé avec tous les champs remplis ou non
     @classmethod
     def return_order(cls, order_id):
-        
-        #identification de l'order par son id 
-        order = Order.get(id = order_id)
+        try:
+            #identification de l'order par son id 
+            order = Order.get(id = order_id)
+        except Order.DoesNotExist:
+            return {'error': 'Order not found.'}, 404
 
         #elaboration de la liste de l'order qui comprend toutes les informations 
         order_json= {
@@ -73,7 +75,7 @@ class API_Inter_Order_Services(object):
             "credit_card": {},
             "shipping_information" : {}
         }
-        
+    
         #récupération des id product avec leur quantité
         #récupération par une requete select de l'ensemble des command_order lié à l'order 
         command_info = CommandOrder.select().where(CommandOrder.id_order == order.id)
@@ -84,35 +86,41 @@ class API_Inter_Order_Services(object):
         if order.shipping_information is not None:
             shipping_info = order.shipping_information
             order_json['shipping_information'] = {
-                'id': shipping_info.id,
                 'country': shipping_info.country,
                 'address': shipping_info.address,
-            'city': shipping_info.city,
-            'province': shipping_info.province
-        }
+                'city': shipping_info.city,
+                'province': shipping_info.province
+            }
 
         # Récupération des informations de transaction
         if order.transaction is not None:
             transaction = order.transaction
-            order_json['transaction'] = {
-                'id': transaction.id,
+            transaction_json = {
+                'id': transaction.id_transac,
                 'success': transaction.success,
-                'amount_charged': transaction.amount_charged
+                'amount_charged': transaction.amount_charged,
+                'error' : {}
             }
+            if transaction.error is not None:
+                transaction_json['error'] = {
+                    'code': transaction.error.code,
+                    'name': transaction.error.name
+                }
+            order_json['transaction'] = transaction_json
 
         # Récupération des informations de carte de crédit
         if order.credit_card is not None:
             credit_card = order.credit_card
             order_json['credit_card'] = {
-                'id': credit_card.id,
                 'name': credit_card.name,
                 'first_digits': credit_card.first_digits,
                 'last_digits': credit_card.last_digits,
                 'expiration_year': credit_card.expiration_year,
                 'expiration_month': credit_card.expiration_month
             }
+
         return order_json
-    
+
     #METHODE pour  la mise à jour du shipping information 
     @classmethod
     def put_order_infoClient(cls,order_id, request):
@@ -225,21 +233,41 @@ class API_Inter_Order_Services(object):
                 
         # envoyer la demande de paiement 
         response = API_Ext_Services.to_verifCard(info_credit)
+
+        #si impossibilite de paiement alors le persister dans transaction 
         if response['code'] != 200:
+            
+            error = Error.create(code = response['error']['credit_card']['code'], name = response['error']['credit_card']['name'] )
+            transaction = Transaction.create(
+                                success = False,
+                                amount_charged = total_amount,
+                                error = error)
+            order_paiement.transaction = transaction.id
+            order_paiement.save()
+
             return {'error': response['error'], 'code' : response['code']}
         
-        #c'est la que je remplit le credit_card et transaction 
-        # paid = true 
-        #CreditCard.create(name = response['transaction'][], first_digits = , last_digits = , expiration_year = , expiration_month = ,)
-        #reste à faire l'erreur et à implémenter credit_card et transaction 
-        #implémentation de reddis et faire 2 focntions une au départ pour récupérer les infos si il ya et une autre pour implémenter et refaire la consultation de l'order (paid =true)
-        return {'order' : "credit_card OK" ,'code': 200}
-        """ "name" : John Doe
-        "number" : 4242 4242 4242 4242 
-        "expiration_year" : 2024 
-        "cvv" : 123 
-        "expiration_month" : 9 """
-    
+        #c'est la que je remplit le credit_card et transaction lorque paiemet OK
+        credit = CreditCard.create(name=response['transaction']['credit_card']['name'],
+                           first_digits=response['transaction']['credit_card']['first_digits'],
+                           last_digits=response['transaction']['credit_card']['last_digits'],
+                           expiration_year=response['transaction']['credit_card']['expiration_year'],
+                           expiration_month=response['transaction']['credit_card']['expiration_month'])
+        
+        transaction = Transaction.create(id_transac = response['transaction']['transaction']['id'],
+                                success = response['transaction']['transaction']['success'],
+                                amount_charged = response['transaction']['transaction']['amount_charged'])
+
+        order_paiement.paid = True
+        order_paiement.credit_card = credit.id
+        order_paiement.transaction = transaction.id
+        order_paiement.save()
+        
+        #implémentation de reddis et faire 2 fonctions une au départ pour récupérer les infos si il ya et une autre pour implémenter et refaire la consultation de l'order (paid =true)
+        
+        return { 'order': response , 'code' : 200}
+        
+    #METHODE pour vérifier tous les champs ainsi que leur remplissage
     @classmethod
     def verif_creditCard(cls,request):
         

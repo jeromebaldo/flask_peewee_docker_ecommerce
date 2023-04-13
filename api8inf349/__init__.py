@@ -1,13 +1,19 @@
 from flask import Flask, jsonify, redirect, url_for, request, render_template
 from peewee import *
+from redis import Redis
+import os
+
 from api8inf349.models.models import Product, init_app
 
 from api8inf349.services.services_ext import API_Ext_Services
 from api8inf349.services.services_int_product import API_Inter_Product_Services
 from api8inf349.services.services_int_order import API_Inter_Order_Services
 
-from api8inf349.models.models import Product, Order, CommandOrder
 
+
+redis = Redis(host="cache", port=6379, db=0)
+
+#os.environ['DB_NAME']
 def create_app(initial_config=None):
     
     app = Flask("api8inf349")
@@ -118,6 +124,9 @@ def create_app(initial_config=None):
             
             response = API_Inter_Order_Services.put_order_paiement(order_id, request)
             if response['code'] == 200:
+                ##############################
+                ##############################
+                #########c'est là que je récupère le json pour le mettre dans le redis 
                 return jsonify(response['order']), response['code']
             else:
                return jsonify(response['error']), response['code']

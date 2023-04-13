@@ -37,11 +37,20 @@ class Shipping_Information(BaseModel):
     province = CharField()
 
 ######################################
+#TABLE ET CLASSE pour les informations sur les erreurs de paiements
+class Error(BaseModel):
+    id = AutoField(primary_key=True)
+    code = CharField()
+    name = CharField()
+
+######################################
 #TABLE ET CLASSE pour les informations de transaction
 class Transaction(BaseModel):
-    id = CharField(primary_key=True)
+    id = AutoField(primary_key=True)
+    id_transac = CharField(null=True)
     success = BooleanField()
     amount_charged = IntegerField()
+    error = ForeignKeyField(Error, backref="orders", null=True)
 
 ######################################
 #TABLE ET CLASSE pour les informations sur la credit card 
@@ -85,7 +94,7 @@ def init_db_command():
     host=os.environ['DB_HOST'],
     port=os.environ['DB_PORT']
     )
-    database.create_tables([Product, Shipping_Information, Transaction, CreditCard , Order, CommandOrder])
+    database.create_tables([Product, Shipping_Information, Error, Transaction, CreditCard , Order, CommandOrder])
     click.echo("Initialized the database.")
         
 def init_app(app):

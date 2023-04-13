@@ -2,6 +2,14 @@ version: '3'
 
 services:
   
+  cache:
+    image: redis:latest
+    restart: always
+    ports:
+      - '6379:6379'
+    expose:
+      - '6379'
+
   # conteneur postgresql
   db:
     image: postgres:12
