@@ -25,8 +25,6 @@ def create_app(initial_config=None):
             API_Ext_Services.update_products()       
     update_on_start() 
     
-
-
     ############################################
     #ROUTE qui affiche tous les produits dans le tableau 
     @app.route('/', methods=['GET'])
@@ -125,7 +123,10 @@ def create_app(initial_config=None):
             response = API_Inter_Order_Services.put_order_infoClient(order_id, request)
 
             if response['code'] == 200:
-                return jsonify(response['order']), response['code']
+                #si succes alors retourne le lien du get pourvoir l'état de la commande 
+                lien_order = url_for('get_order', order_id = order_id , _external=True)
+                return jsonify({'lien_order': lien_order})
+        
             else:
                return jsonify(response['error']), response['code'] 
             
@@ -138,8 +139,11 @@ def create_app(initial_config=None):
                 #l'order a été payé ainsi je l'inclue dans le redis avec l'id de l'order comme clé 
                 order_redis = json.dumps(response['order'])
                 redis.set(order_id, order_redis)
+                
+                #succes du paiement alors on revient sur get order pour voir l'état de la commande
+                lien_order = url_for('get_order', order_id = order_id , _external=True)
+                return jsonify({'lien_order': lien_order})
 
-                return jsonify(response['order']), response['code']
             else:
                return jsonify(response['error']), response['code']
         
