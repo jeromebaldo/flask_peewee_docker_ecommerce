@@ -2,8 +2,8 @@ from flask import Flask, jsonify, redirect, url_for, request, render_template
 from peewee import *
 from redis import Redis
 import os
-
-from api8inf349.models.models import Product, init_app
+import json
+from api8inf349.models.models import Product, Order, init_app
 
 from api8inf349.services.services_ext import API_Ext_Services
 from api8inf349.services.services_int_product import API_Inter_Product_Services
@@ -23,7 +23,9 @@ def create_app(initial_config=None):
     def update_on_start():
         if Product.table_exists(): # pour eviter la collision entre init-db et la mise à jour 
             API_Ext_Services.update_products()       
-    update_on_start()    
+    update_on_start() 
+    
+
 
     ############################################
     #ROUTE qui affiche tous les produits dans le tableau 
@@ -91,18 +93,26 @@ def create_app(initial_config=None):
     def get_order(order_id):
         
         response = []
+        base = None
+        ### 1er ETAPE : Recuperation de l'order dans redis si déja payé sinon consultation postgresSQL
+        
+        order_redis = redis.get(order_id)
+        if order_redis:
+            response = json.loads(order_redis)
+            base = "REDIS"
+            return render_template('info_commande.html', order=response, order_id=order_id, base=base), 200
 
-        ### 1er ETAPE : vérifier que l'order est bien enregistré dans la base 
+        ### 2e ETAPE : vérifier que l'order est bien enregistré dans postgresSQL
         
         response = API_Inter_Order_Services.exist_order(order_id)
         if response['code'] == 404:
             return jsonify(response['error']), response['code']
         
-        ### 2e ETAPE : retourner le json de l'order cible 
+        ### 3e ETAPE : retourner le json de l'order cible 
         
         response = API_Inter_Order_Services.return_order(order_id)
-        
-        return render_template('info_commande.html', order=response, order_id=response['id']), 200
+        base = "POSTGRES"
+        return render_template('info_commande.html', order=response, order_id=response['id'], base=base), 200
 
     ############################################
     #ROUTE qui met à jour le shipping information ou réalise le paiement de l'order 
@@ -124,9 +134,11 @@ def create_app(initial_config=None):
             
             response = API_Inter_Order_Services.put_order_paiement(order_id, request)
             if response['code'] == 200:
-                ##############################
-                ##############################
-                #########c'est là que je récupère le json pour le mettre dans le redis 
+                
+                #l'order a été payé ainsi je l'inclue dans le redis avec l'id de l'order comme clé 
+                order_redis = json.dumps(response['order'])
+                redis.set(order_id, order_redis)
+
                 return jsonify(response['order']), response['code']
             else:
                return jsonify(response['error']), response['code']
