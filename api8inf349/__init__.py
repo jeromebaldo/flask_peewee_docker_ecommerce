@@ -5,6 +5,8 @@ import os
 import json
 from api8inf349.models.models import Product, Order, CommandOrder, init_app
 
+from rq import Queue, Worker
+
 from api8inf349.services.services_ext import API_Ext_Services
 from api8inf349.services.services_int_product import API_Inter_Product_Services
 from api8inf349.services.services_int_order import API_Inter_Order_Services
