@@ -168,7 +168,6 @@ def create_app(initial_config=None):
                                         'error' : {} }
                                 }}
 
-                
                 command_info = CommandOrder.select().where(CommandOrder.id_order == order.id)
                 for command in command_info:
                     order_final['order']['products'].append({"id" : command.id_product.id, "quantity" : command.quantity})
