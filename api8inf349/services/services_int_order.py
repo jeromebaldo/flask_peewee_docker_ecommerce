@@ -14,14 +14,18 @@ class API_Inter_Order_Services(object):
     @classmethod
     def crea_order(cls, selected_products):
         
+        
         weight_total = 0
         total_price = 0
         shipping_price = 0
+        
+        #recuperation des produits et calcul du poid total et du total price 
         for productSelec in selected_products:
             product = Product.get(id = productSelec['id'])
             weight_total += product.weight * int(productSelec['quantity'])
             total_price += product.price * int(productSelec['quantity'])
         
+        #selon le poids le shipping price va varier 
         if weight_total < 500:
             shipping_price = 5
         if weight_total >= 500 and weight_total < 2000:
@@ -29,8 +33,10 @@ class API_Inter_Order_Services(object):
         if weight_total >= 2000:
             shipping_price = 25
 
+        #création de l'order
         order_cree = Order.create(total_price=total_price, shipping_price=shipping_price)
         
+        #creation des produits commandés selon le nombre de produits donné en json 
         for product in selected_products:
             CommandOrder.create(id_order=order_cree, id_product= product['id'], quantity=product['quantity'])
 

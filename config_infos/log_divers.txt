@@ -1,3 +1,5 @@
+composition des conteneurs 
+PGADMIN 
 URL : http://localhost:5050/
 Email : admin@admin.com
 Mot de passe : pass
@@ -12,6 +14,9 @@ Dans l'onglet "Connexion", remplissez les informations de connexion suivantes :
     Nom d'utilisateur : user (comme défini dans votre docker-compose)
     Mot de passe : pass (comme défini dans votre docker-compose)
 
+DATA POUR TEST
+
+CREDIT_CARD
 
 BONNE CARTE 
 name : John Doe
@@ -19,7 +24,6 @@ number : 4242 4242 4242 4242
 expiration_month : 9 
 expiration_year : 2024 
 cvv : 123 
-
 
 MAUVAISE CARTE - REFUSE PAR SERVICE DE PAIEMENT
 name : John Doe
@@ -36,12 +40,27 @@ expiration_year : 2028
 cvv : 456
 
 
-soucie à règler : 
-api8inf349_balj17058609-api8inf349-1  | peewee.IntegrityError: update or delete on table "product" violates foreign key constraint "commandorder_id_product_id_fkey" on table "commandorder"
-api8inf349_balj17058609-api8inf349-1  | DETAIL:  Key (id)=(1) is still referenced from table "commandorder".
+SHIPPING INFORMATIONS 
+EX 1
+country Canada 
+address 201, rue Président-Kennedy
+postal_code G7X 3Y7
+city Chicoutimi
+province QC
+email jgnault@uqac.ca
 
-lien get à mettre quand mise à jour réussi 
+EX2
+country Canada 
+address 222, rue Price
+postal_code G7X 3Y7
+city Saguenay
+province QC
+email bob@uqac.ca
 
-se pencher sur le retour du get  / pour 
-faire une mise en page plus correct pour le get commande (separé les parties )
-
+EX3
+country Canada 
+address 222, rue Racine
+postal_code G7X 3Y7
+city Lac-Saint-Jean
+province QC
+email alice@uqac.ca
