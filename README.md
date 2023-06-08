@@ -42,7 +42,7 @@ Ce laboratoire a consisté à développer et déployer une application Web respo
 - Documentation officielle de Peewee => http://docs.peewee-orm.com/en/latest/
 - Documentation officielle de Flask => https://flask.palletsprojects.com/en/2.3.x/ et https://flask-fr.readthedocs.io/
 - Pour la résolution de la contenarisation d'Angular => https://github.com/docker/awesome-compose/tree/master/angular
-- 
+
 ## Changelog
 ### V1 => 
 - version initiale
