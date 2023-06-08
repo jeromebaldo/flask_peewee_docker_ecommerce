@@ -11,8 +11,8 @@ Dans l'onglet "Connexion", remplissez les informations de connexion suivantes :
 
     Hôte : postgres
     Port : 5432 (par défaut)
-    Nom d'utilisateur : user (comme défini dans votre docker-compose)
-    Mot de passe : pass (comme défini dans votre docker-compose)
+    Nom d'utilisateur : user 
+    Mot de passe : pass 
 
 DATA POUR TEST
 
